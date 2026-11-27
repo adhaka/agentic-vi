@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="850" viewBox="0 0 960 850" role="img" aria-labelledby="title desc">
+<title id="title">Eight Schools | Variational Difficulty Profile</title><desc id="desc">Radar plot of centered and non-centered fits after 3000 updates. Axis-specific visualization scaling, not calibrated scores.</desc>
+<rect width="960" height="850" fill="white"/>
+<g font-family="Arial, sans-serif" fill="#172333">
+<text x="480" y="38" font-size="27" font-weight="bold" text-anchor="middle">Eight Schools | Variational Difficulty Profile</text>
+<text x="480" y="69" font-size="17" text-anchor="middle">3,000 Adam updates per run · four MFVI fits per parameterization</text>
+<circle cx="480" cy="420" r="61.25" fill="none" stroke="#cbd2d9" stroke-width="1.2"/><text x="509.4" y="363.325" font-size="12" fill="#53606d">0.25</text>
+<circle cx="480" cy="420" r="122.5" fill="none" stroke="#cbd2d9" stroke-width="1.2"/><text x="538.8" y="310.65" font-size="12" fill="#53606d">0.50</text>
+<circle cx="480" cy="420" r="183.75" fill="none" stroke="#cbd2d9" stroke-width="1.2"/><text x="568.2" y="257.975" font-size="12" fill="#53606d">0.75</text>
+<circle cx="480" cy="420" r="245" fill="none" stroke="#cbd2d9" stroke-width="1.2"/><text x="597.6" y="205.3" font-size="12" fill="#53606d">1.00</text>
+<line x1="480" y1="420" x2="480.00" y2="175.00" stroke="#cbd2d9"/>
+<line x1="480" y1="420" x2="713.01" y2="344.29" stroke="#cbd2d9"/>
+<line x1="480" y1="420" x2="624.01" y2="618.21" stroke="#cbd2d9"/>
+<line x1="480" y1="420" x2="335.99" y2="618.21" stroke="#cbd2d9"/>
+<line x1="480" y1="420" x2="246.99" y2="344.29" stroke="#cbd2d9"/>
+<polygon points="480.00,242.73 622.55,373.68 594.80,578.01 380.50,556.95 250.78,345.52" stroke="#2166ac" stroke-width="3.5" fill="#2166ac" fill-opacity=".13" stroke-linejoin="round"/><circle cx="480.00" cy="242.73" r="5" fill="#2166ac"/><circle cx="622.55" cy="373.68" r="5" fill="#2166ac"/><circle cx="594.80" cy="578.01" r="5" fill="#2166ac"/><circle cx="380.50" cy="556.95" r="5" fill="#2166ac"/><circle cx="250.78" cy="345.52" r="5" fill="#2166ac"/>
+<polygon points="480.00,415.61 556.35,395.19 568.76,542.17 422.66,498.93 477.67,419.24" stroke="#df7900" stroke-width="3.5" fill="#df7900" fill-opacity=".13" stroke-linejoin="round"/><circle cx="480.00" cy="415.61" r="5" fill="#df7900"/><circle cx="556.35" cy="395.19" r="5" fill="#df7900"/><circle cx="568.76" cy="542.17" r="5" fill="#df7900"/><circle cx="422.66" cy="498.93" r="5" fill="#df7900"/><circle cx="477.67" cy="419.24" r="5" fill="#df7900"/>
+<text x="480" y="125" font-size="17" text-anchor="middle">Optimization<tspan x="480" dy="20" font-size="14">(max R-hat)</tspan></text>
+<text x="815" y="323" font-size="17" text-anchor="middle">Dependence<tspan x="815" dy="20" font-size="14">(curvature interaction)</tspan></text>
+<text x="674" y="680" font-size="17" text-anchor="middle">Tail / coverage<tspan x="674" dy="20" font-size="14">(Pareto k)</tspan></text>
+<text x="286" y="680" font-size="17" text-anchor="middle">Geometry<tspan x="286" dy="20" font-size="14">(curvature variation)</tspan></text>
+<text x="145" y="323" font-size="17" text-anchor="middle">Endpoint disagreement<tspan x="145" dy="20" font-size="14">(max symmetrized KL)</tspan></text>
+<line x1="270" x2="310" y1="745" y2="745" stroke="#2166ac" stroke-width="4"/><text x="320" y="751" font-size="18">Centered</text><line x1="505" x2="545" y1="745" y2="745" stroke="#df7900" stroke-width="4"/><text x="555" y="751" font-size="18">Non-centered</text>
+<g text-anchor="middle" font-size="14" fill="#42505c"><text x="480" y="785">Visualization only — not calibrated difficulty scores. All axes clipped to [0, 1].</text><text x="480" y="807">Scales: (R-hat − 1)/4; curvature and k unchanged; pairwise KL / 10 nats.</text><text x="480" y="829">Curvature and k: medians; R-hat and pairwise KL: maxima. Disagreement is not proof of multimodality.</text></g></g></svg>
