@@ -1,0 +1,37 @@
+experiment_name: mfvi_gaussian_baseline_v0
+description: Fixed-budget MFVI baseline on synthetic Gaussian targets.
+
+# Keep this file immutable during an experiment. Candidate algorithms may not
+# edit benchmark definitions, evaluation code, or this protocol.
+default:
+  dimension: 10
+  target: correlated
+  seed: 0
+  steps: 3000
+  learning_rate: 0.03
+  mc_samples: 128
+  log_every: 100
+  dtype: float64
+
+seed_sweep: [0, 1, 2, 3, 4]
+
+targets:
+  independent:
+    covariance: diagonal
+  correlated:
+    covariance: dense_toeplitz_like
+  ill_conditioned:
+    covariance: eigenvalue_conditioned
+
+primary_evaluation:
+  - exact_reverse_kl_q_to_p
+  - mean_squared_error
+  - diagonal_variance_mse
+  - final_elbo
+  - runtime_seconds
+
+guardrails:
+  - all_metrics_finite
+  - all_parameters_finite
+  - fixed_step_budget
+  - report_all_seeds
