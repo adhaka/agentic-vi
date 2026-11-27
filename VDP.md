@@ -92,3 +92,117 @@ KL(q_a\|q_b)=\tfrac12\sum_i[\log(v_{bi}/v_{ai})+(v_{ai}+(\mu_{ai}-\mu_{bi})^2)/v
 $$
 
 J_ab=(KL(q_a||q_b)+KL(q_b||q_a))/2. Report matrix, six values, median/max, joint nats and nats/dimension, mean/scale contributions, coordinate mean differences standardized by sqrt((v_a+v_b)/2), log-scale differences. Stable log-ratio algebra. Missing fits yield missing pairs. Costs O(d) per pair and zero target calls. Parameter nonidentifiability matters in future richer families; compare distributions rather than labels.
+
+## 6. Dependence: standardized curvature
+
+Let A(x)=D^{1/2}H(x)D^{1/2}, using each run's final D. For a Gaussian, H=P=Sigma^{-1}; at reverse-KL MFVI optimum v_i=1/P_ii. Define the local interaction statistic
+
+$$
+c_{\rm dep}(x)=\frac{\|A-\mathrm{diag}(A)\|_F}{\|A\|_F}.
+$$
+
+For a standard bivariate Gaussian with correlation rho, optimal A=[[1,-rho],[-rho,1]], c_dep=|rho|/sqrt(1+rho²), marginal variance recovery=1-rho². This is a local curvature measure, not marginal correlation or an objective-independent family error. A diagonal local Hessian cannot exclude global nonlinear dependence. Indefinite H is permitted. Consistent diagonal affine coordinate changes preserve the statistic (up to sign/permutation); general rotations and nonlinear transforms need not.
+
+### 6.1 Matrix-free estimation
+
+Draw J iid locations from each final q; reuse first J of the S independent importance draws. Draw R independent Rademacher vectors z_r, shared across locations within a run, independent of locations. Compute u_jr=A(x_j)z_r by applying the negative log-density HVP in direction D^{1/2}z_r, then left scaling by D^{1/2}. Set t_jri=z_ri u_jri. Conditional on a location and D,
+
+$$
+E_z[t_{jri}]=A_{j,ii},\quad \mathrm{Var}_z(t_{jri})=\sum_{k\ne i}A_{j,ik}^2.
+$$
+
+Estimate total and off-diagonal squared Frobenius energy:
+
+$$
+\widehat F_j=\frac1R\sum_r\|u_{jr}\|^2,\qquad
+\widehat O_j=\sum_i\frac1{R-1}\sum_r(t_{jri}-\bar t_{ji})^2.
+$$
+
+Both energy estimators are unbiased conditional on location and D; R>=2. The primary run-level ratio is
+
+$$
+\widehat C_{\rm dep}=\sqrt{\frac{\sum_j\widehat O_j}{\sum_j\widehat F_j}}.
+$$
+
+It estimates an energy-weighted interaction over q, not the mean of local ratios, and is not unbiased. Report numerator and denominator, local ratios, estimated diagonals, total energy/dimension, extrema. Finite-probe noise may yield O_hat>F_hat; preserve raw ratio and flag, never silently clip. Zero denominator means undefined; nonfinite results invalid. Cost JR HVPs per run, O(JRd) stored vectors or streaming summaries, no dense d-by-d matrices. Dense oracle permitted only for independent small-dimensional tests.
+
+### 6.2 Uncertainty
+
+Use two-way bootstrap sensitivity: independently resample J location indices and R direction indices with replacement; share resampled direction indices across selected locations. Recompute statistic, 200 replicates using separate fixed RNG. Report 2.5/97.5 percentiles and invalid replicate count. This is exploratory Monte Carlo sensitivity, not validated confidence coverage at small J,R. Constant curvature location resampling adds no variation. Retain raw per-run estimates separately; four runs do not characterize population uncertainty. No extra target calls for bootstrap.
+
+## 7. Geometry: curvature variation at zero extra target cost
+
+With the same D, locations, directions and HVPs, define u_bar_r=mean_j u_jr.
+
+$$
+\widehat V=\frac1{R(J-1)}\sum_{r,j}\|u_{jr}-\bar u_r\|^2,\qquad
+\widehat F=\frac1{JR}\sum_{j,r}\|u_{jr}\|^2,\qquad
+\widehat C_{\rm geom}=\sqrt{\widehat V/\widehat F}.
+$$
+
+For J>=2 the numerator estimates E_q||A-E_q A||_F², denominator estimates E_q||A||_F² (finite second moments assumed). Ratio not unbiased; can exceed one at finite J. Report raw energies/ratio, flags, two-way bootstrap sensitivity as above. Undefined for zero denominator. Gaussian constant H implies V=0 up to numerical tolerance, regardless of correlation. Report sampled directional curvatures zᵀu/||z||², minimum and negative fraction. Negative directional curvature is local evidence of nonconvexity; no negative probes does not certify convexity. Samples from q may not explore problematic regions. More extensive geometry probes, finite difference HVPs or spectral estimates deferred to separately charged study.
+
+## 8. Tail/coverage: importance weights and independent ELBO
+
+For each final q independently draw S iid new samples, separate from training and gradient checks. Compute a_s=ell(x_s)-log q(x_s); w_s=exp(a_s-logsumexp(a)). Then
+
+$$
+ESS_{\rm raw}=\frac1{\sum_s w_s^2},\qquad ESS_{\rm relative}=ESS_{\rm raw}/S.
+$$
+
+Report both ESS measures and max weight. Use version-pinned PSIS reference implementation, reff=1 for iid proposal draws. Report Pareto shape k_hat, smoothed normalized log weights and ESS_psis=1/sum(w_psis²), package version and tail-fit warnings. These weight ESS values are not MCMC ESS or actual independent posterior sample sizes. Use documented tail-fitting procedure, verify reference fixtures. The sample-size-dependent reference k_ref=min(1-1/log10(S),0.7) is an importance-sampling reliability warning, not a posterior-accuracy gate. Constant finite log weights imply raw ESS=S; if tail fit is degenerate mark k_hat undefined/constant, never invent a perfect estimate. NaN/+inf invalid; -inf weights indicate zero target density and potential support/ELBO failure (record counts), all-zero weights invalid. Do not drop difficult draws or select only favorable runs. Repeated independent batches for k uncertainty require separate budget; otherwise report no interval and finite-sample limitation.
+
+Report independent final ELBO L_hat=mean(a), SE=sd(a)/sqrt(S) if finite variance plausible. Absolute ELBO differs from -KL by unknown log Z; same-target differences are invariant. Never pool draws from different q as though they came from one proposal; a future mixture estimator must use actual mixture density. All four fits may miss a remote mode, yielding reassuring PSIS and ESS despite poor global coverage. Report this limitation.
+
+## 9. Possible multiple basins
+
+Reuse all six J_ab distances, independent ELBO estimates and within-run drift/gradient/R-hat evidence. No extra evaluations. Distinguish evidence compatible with unstable training, similar solutions, and distinct stable solutions; absent calibrated thresholds record inconclusive rather than assign a hard label. Stable disagreement can result from variational optima even for unimodal p, not proof of target modes. Stable agreement cannot exclude other modes. Report all four fits regardless of relative ELBO. Additional starts, bridge/path probes or mixtures are future budgeted interventions, not oracle diagnostics.
+
+## 10. Data model and workflow
+
+Schema vdp/0.1: finite JSON numbers or null with status (never NaN/Infinity). Store large arrays in referenced artifacts with hashes, shape and dtype. Required top-level groups:
+
+- schema_version, protocol_revision, source_commit, opaque target_instance_id, dimension, dtype, environment, transform, configuration, RNG manifest.
+- budget: B, charge schedule, used/remaining TEU, N_f/N_g/N_h, stage/run ledgers, attempts/completions/failures/denials, time, memory, stop_reason.
+- runs[4]: start/end raw/effective mu/lambda, clamp flags, run status, trajectory reference, costs, gradient check, importance/ELBO diagnostics and curvature diagnostics.
+- profile: optimization (R-hat/drift/stationarity/agreement), dependence, tails, geometry, possible_basins. Preserve per-run raw estimates and joint/per-dimension KL.
+- evidence: uncertainty methods, assumptions, warnings, missing metrics, recommended investigation or abstention.
+- evaluator: separate privileged artifact, inaccessible to inference.
+
+Each metric record: value, status (ok, not_requested, unsupported, insufficient_budget, insufficient_samples, degenerate, nonfinite, run_failed, inconclusive), units, sample_count, estimator_version, uncertainty nullable, warnings. "ok" means computation succeeded, not posterior accuracy. Preserve partial results; no selected-subset four-run diagnostic.
+
+Reference workflow:
+
+    freeze protocol, B, seed IDs, allocations; validate meter
+    for each of four runs:
+        initialize from declared RNG
+        for T steps:
+            reserve complete batch before target work
+            evaluate metered value_grad on reparameterized draws
+            on invalid evaluation record failure; stop this run
+            compute explicit gradient, update Adam, log trajectory
+        freeze last valid endpoint; flag incomplete runs
+    compute trajectory and pairwise diagnostics
+    for each eligible endpoint:
+        perform fresh gradient check
+        perform fresh importance draws / ELBO
+        reuse first J locations for R HVP directions
+        estimate dependence, geometry and bootstrap sensitivity
+    emit VDP, all statuses, costs and recommendation/abstention
+    independently audit and evaluate against benchmark truth
+
+No silent restarts or reallocation. On insufficient budget skip unaffordable diagnostic and report why. Endpoint diagnostics may be useful even after partial training if labeled as such.
+
+## 11. Candidate intervention policy (not automated in v0.1)
+
+| Evidence | Investigation | Alternative explanation |
+|---|---|---|
+| Stable agreement, small drift/gradient, no coverage warnings | Retain MFVI if independent quality evidence supports requirements | Shared wrong solution, missed mode |
+| Drift, unstable fluctuations or large gradients | Optimizer, step size, gradient estimator or more budget | Scaling, local optima |
+| Stable agreement and off-diagonal curvature | Objective or smallest useful covariance extension | Local curvature only |
+| High k or low ESS | Tail/coverage strategy, objective or family | Finite-sample noise, optimization failure |
+| Curvature variation/negative directional curvature | Reparameterization or flexible family | Poor fit, local artifact |
+| Distinct stable fits | More starts, alternative objective or mixture | Local variational optima |
+| Missing/conflicting evidence | Targeted additional information or abstain | Unknown |
+
+Policy must not treat raw diagnostics as calibrated accuracy guarantees. Future experiments compare VDP routing with fixed MFVI, same-budget restart-only, fixed richer methods and oracle routing (evaluator-only). Count all probe/diagnostic/intervention costs. Learn whether VDP predicts intervention benefits, rather than assume it does.
