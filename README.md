@@ -74,3 +74,7 @@ validation and benchmark expansion, not unrestricted automated search.
 [Research charter and analytical reference](RESEARCH.md) · [Scientific report and reproduction commands](research/task001/REPORT.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 
 Schema 2 reports the exact post-update ELBO, irreducible mean-field KL, excess optimization KL, and separate errors for posterior marginal variances and optimal mean-field variances. Historical reports used the last pre-update Monte Carlo training estimate for `final_elbo`. Use the canonical metric names in DECISIONS.md for new analyses.
+
+## Task 002 · Variational Difficulty Profile
+
+The four-run probe uses metered log densities, gradients and negative-Hessian-vector products. It records optimization, local curvature, importance-weight and between-fit diagnostics. The research dependencies and reproduction commands are in the [Task 002 scientific report](research/task002/REPORT.md). The [frozen protocol](research/task002/PROTOCOL.md) defines the study matrix and charge convention.
