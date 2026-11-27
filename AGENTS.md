@@ -20,3 +20,12 @@ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 python -m unittest discover -s tests -v
 ```
 
 Task 001 includes the experiment runner, audit command, raw data, and interpretation under research/task001.
+
+
+## Objective and family discovery rules (proposed Task 002)
+
+- Treat objective, family, optimizer and adaptation as distinct experimental factors. Change one factor at a time when diagnosing effects; use factorial comparisons when testing interactions.
+- Every training objective must specify direction, normalization convention, estimator, bias/variance limitations, target access requirements and cost. Oracle target samples/moments are evaluation-only; label oracle comparators explicitly.
+- Never select candidates solely by their own training objective. Freeze complementary quality gates before running candidates, report all failures, and prefer simpler feasible methods. Do not silently tune thresholds or reuse held-out targets for development.
+- Count target log-density and gradient calls including adaptation and importance weighting; report wall time and memory separately. Matched steps alone are not matched compute.
+- Task 002 is a proposed controlled study, not permission to start autonomous search. Preserve Task 001 and prepare a versioned protocol for review before execution. Repository rules alone are not a security boundary: future agent execution must enforce evaluator and benchmark isolation.
