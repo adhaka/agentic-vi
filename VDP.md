@@ -206,3 +206,40 @@ No silent restarts or reallocation. On insufficient budget skip unaffordable dia
 | Missing/conflicting evidence | Targeted additional information or abstain | Unknown |
 
 Policy must not treat raw diagnostics as calibrated accuracy guarantees. Future experiments compare VDP routing with fixed MFVI, same-budget restart-only, fixed richer methods and oracle routing (evaluator-only). Count all probe/diagnostic/intervention costs. Learn whether VDP predicts intervention benefits, rather than assume it does.
+
+
+## 12. Verification and staged empirical validation
+
+### Task 002: implementation and Gaussian controls
+
+1. Preserve archived Task 001 runs and protocol; create a versioned Task 002 protocol and fresh output directories. Treat settings in §4.1 as proposed defaults requiring review. Freeze configuration, environment, compute limits, target instances and comparator settings before execution.
+2. Test meter: scalar and batch charges, exact boundary, atomic rejection, failed attempts, concurrent reservation if supported, independent instrumentation of target calls, no optimizer mutation on denial, no hidden direct calls. Assert ledger reconciliation and used<=B throughout.
+3. Test pathwise gradient against autodiff on analytic quadratic targets with same epsilon; verify clamp derivative, post-update trajectory indexing and independent ELBO. Verify additive log-density shift invariance (same RNG, ELBO shifts by constant); diagonal affine curvature invariance with transformed q; reproducible streams. Verify oracle access is excluded.
+4. Test R-hat on synthetic stationary identical, mean-separated, scale-separated, drifting, tied, constant equal/unequal and odd-length traces, missing runs and nonfinite values. Compare nondegenerate cases to pinned reference library. Test drift and pairwise Gaussian KL symmetry/nonnegativity/identity, mean/scale decomposition and scale stability.
+5. Test HVP estimators against exact dense oracle on small diagonal, correlated bivariate and general SPD Gaussian matrices. Verify constant curvature variation zero, zero/indefinite H, J=1/R=1 invalid, reproducibility, convergence of energies across repeated random probes and increasing R (not exact equality of noisy ratio). Test varying-curvature toy. Test PSIS and ESS on constant, varying, degenerate and invalid weights, underdispersed Gaussian, log-density shifts and pinned reference fixtures. Test JSON/status and partial-result paths.
+6. Development controls: archived independent, correlated and ill-conditioned Gaussian targets at d=10,50,100, four restarts and proposed budget horizons. Preserve Task 001 realized covariances. Add a versioned full-rank seeded normal-matrix QR rotation generator for new instances; record realized matrices and sign convention, avoid historical rank-deficient sine construction. Use opaque instance IDs. Include deliberately short budget and predeclared unstable optimizer controls. Common-start comparisons on a predeclared subset, fully charged. Freeze a bounded experiment matrix before executing it.
+7. Independent evaluator reports exact reverse/forward KL, reverse-KL family floor and optimization gap, mean, marginal variance and correlation/covariance errors, joint/per-dimension errors. Compare with diagnostics to test whether incomplete fitting can be distinguished from converged but underdispersed MFVI. Keep all seeds and failed runs. Report seed extrema and variability across target instances separately. No claim that agreement establishes global convergence.
+8. Deliver code, tests, frozen protocol, raw results and ledgers, reproducible commands, independent audit, scientific report and limitations on a review branch. No autonomous discovery. Test success precedes empirical claims; unsupported diagnostics are explicitly recorded.
+
+### Task 003: generalization and calibration (separate protocol)
+
+Use banana, funnel, heavy-tailed unimodal targets, balanced and imbalanced mixtures, including distant hidden modes and cases with similar local but different global behavior. Use multiple independently generated target instances. Hold out entire instances/geometries, not merely optimization seeds. Define benchmark truth or reference uncertainty, objective-dependent optimization failure separately from posterior quality, and predeclared quality losses. Freeze development/holdout split, thresholds, uncertainty summaries, and budgets before candidate evaluations. Measure sensitivity/specificity (where labels meaningful), false reassurance, ambiguity/abstention, dimension/coordinate sensitivity, and cost vs horizon/probe count. Use development data only to calibrate gates, then evaluate on untouched holdouts. No numerical threshold is endorsed before validation.
+
+Task 004+ evaluates objective/family/optimizer interventions and predictive usefulness of VDP under matched end-to-end budgets. Compare Pareto quality-cost tradeoffs and worst failures. No composite improvement can compensate for critical reliability failure. Return unresolved warnings when no validated gate is attainable within B. Finite black-box evaluation cannot certify global posterior coverage for arbitrary densities.
+
+## 13. Literature anchors and novelty boundary
+
+- Dhaka et al. (2020), [Robust, Accurate Stochastic Optimization for Variational Inference](https://proceedings.neurips.cc/paper/2020/hash/7cac11e2f46ed46c339ec3d569853759-Abstract.html), NeurIPS. Existing work treats stochastic optimization as a Markov process and develops convergence diagnostics and stopping rules. Applying R-hat to VI must not be claimed as novel without careful comparison.
+- Dhaka et al. (2021), [Challenges and Opportunities in High Dimensional Variational Inference](https://proceedings.neurips.cc/paper_files/paper/2021/hash/404dcc91b2aeaa7caa47487d1483e48a-Abstract.html), NeurIPS. Objective/family/optimization tradeoffs motivate our research.
+- Vehtari et al. (2021), [Rank-normalization, folding, and localization: An improved R-hat for assessing convergence of MCMC](https://doi.org/10.1214/20-BA1221), Bayesian Analysis. MCMC reference statistic, requiring separate validation for VI trajectories.
+- Yao et al. (2018), [Yes, but Did It Work?: Evaluating Variational Inference](https://proceedings.mlr.press/v80/yao18a.html), ICML. Existing PSIS and simulation-based calibration for VI assessment.
+- Vehtari et al. (2024), [Pareto Smoothed Importance Sampling](https://jmlr.org/papers/v25/19-556.html), JMLR. Modern PSIS and sample-size-dependent diagnostic references.
+
+The candidate contribution is the budgeted joint difficulty profile, its empirical predictive value for intervention selection, and the resulting adaptive inference policy. Individual diagnostic techniques are not automatically novel. A broader prior-art review is required before a novelty claim.
+
+## 14. Decisions requiring review before execution
+
+- Four runs and unnormalized target access are project requirements; TEU weights, sample counts, seed derivation, initialization spread, diagnostic windows, and fixed training horizons are proposed engineering conventions.
+- Choose and pin the exact PSIS/R-hat reference library and dependency versions in implementation; confirm reference output conventions. Do not silently reinterpret metrics.
+- Freeze the explicit benchmark matrix, unstable-optimizer comparator, common-start subset, and quality losses/gates as appropriate to each stage. Record the cost ceiling for the entire experiment separately from each inference run.
+- This is a specification, not implemented software or validated experimental evidence. Keep Task 001 unchanged and update the review branch only.
