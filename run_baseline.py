@@ -1,8 +1,8 @@
 """Run one or more reproducible MFVI Gaussian baseline experiments."""
 import argparse
 import json
+import hashlib
 import random
-import time
 from pathlib import Path
 
 import numpy as np
@@ -30,20 +30,25 @@ def run_one(args, seed):
     )
     model = MeanFieldGaussianVI(config)
     fit_result = model.fit(target)
-    final_elbo = fit_result["history"][-1]["elbo"]
-    metrics = evaluate_mfvi(model, target, final_elbo=final_elbo)
+    metrics = evaluate_mfvi(model, target)
+    mean, variance = model.moments()
 
     return {
+        "evaluation_schema": 2,
         "experiment": "mfvi_gaussian_baseline_v0",
         "seed": seed,
         "target": args.target,
         "dimension": args.dimension,
         "config": {
+            "log_every": args.log_every,
             "steps": args.steps,
             "learning_rate": args.learning_rate,
             "mc_samples": args.mc_samples,
             "dtype": args.dtype,
         },
+        "covariance_sha256": hashlib.sha256(target.covariance.numpy().tobytes()).hexdigest(),
+        "fitted_mean": mean.tolist(),
+        "fitted_variance": variance.tolist(),
         "runtime_seconds": fit_result["runtime_seconds"],
         "metrics": metrics,
         "training_history": fit_result["history"],

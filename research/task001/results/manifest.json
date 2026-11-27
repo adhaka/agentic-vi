@@ -1,0 +1,23 @@
+{
+  "source_commit": "5a285c32d2949e3cc169aeb8dad8abac1da9a7d0",
+  "sha256": {
+    "protocol.yaml": "248fe0fee8edb96625da717e0088fdf8456bdc080019198adf379b299515cdf8",
+    "agentic_vi/algorithms/mfvi.py": "3860b12339c0f020c76ef38a4b311f889c7f878cb969eda6e36b960193a74e32",
+    "agentic_vi/evaluation.py": "d19c2f9e758609d03bcdf1ff23f0b2bb30d4012870fabc9ae11a75c5aa1a8485",
+    "agentic_vi/targets.py": "7635d392a34716d9e94a0361f1491ba542101aec81f6ebdda71975851988fe6a",
+    "run_baseline.py": "99ba58f041eee19b78f2300c6462f4bb5eb265650cd33a266922480da2195d23",
+    "research/task001/run.py": "0dd82c7cd1bc73287ac7b1fda72c5df502c9fd349a49f652517934ea94b874aa"
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "torch": "2.9.1+cpu",
+  "numpy": "2.2.6",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "processor": "",
+  "device": "cpu",
+  "intraop_threads": 1,
+  "interop_threads": 1,
+  "failures": [],
+  "wall_seconds": 131.42295020199998,
+  "cpu_seconds": 131.343812601,
+  "peak_rss_kib": 247640
+}

@@ -17,24 +17,32 @@ def exact_kl_diagonal_gaussian_to_target(q_mean, q_variance, target):
 
 
 @torch.no_grad()
-def evaluate_mfvi(model, target, final_elbo=None):
-    q_mean, q_variance = model.moments()
-    target_mean = target.mean
-    # The reverse-KL-optimal diagonal Gaussian has variance 1 / diag(precision).
-    optimal_mf_variance = 1.0 / torch.diagonal(target.precision)
-
-    metrics = {
-        "exact_reverse_kl_q_to_p": float(
-            exact_kl_diagonal_gaussian_to_target(q_mean, q_variance, target).cpu()
+def evaluate_mfvi(model, target):
+    """Evaluate the final distribution against the normalized Gaussian target."""
+    mean, variance = model.moments()
+    precision_diag = torch.diagonal(target.precision)
+    optimal_variance = precision_diag.reciprocal()
+    delta = mean - target.mean
+    total = exact_kl_diagonal_gaussian_to_target(mean, variance, target)
+    floor = 0.5 * (target.logdet_covariance + precision_diag.log().sum())
+    # Compute excess KL directly to avoid subtracting two large total KLs.
+    log_ratio = variance.log() + precision_diag.log()
+    gap = 0.5 * (delta @ target.precision @ delta
+                 + (log_ratio.expm1() - log_ratio).sum())
+    mean_mse = float(delta.square().mean())
+    optimal_variance_mse = float((variance - optimal_variance).square().mean())
+    return {
+        "exact_reverse_kl_q_to_p": float(total),
+        "irreducible_mean_field_kl": float(floor),
+        "optimization_gap_kl": float(gap),
+        "posterior_mean_mse": mean_mse,
+        "optimal_mean_field_variance_mse": optimal_variance_mse,
+        "posterior_marginal_variance_mse": float(
+            (variance - target.covariance.diagonal()).square().mean()
         ),
-        "mean_squared_error": float(torch.mean((q_mean - target_mean) ** 2).cpu()),
-        "diagonal_variance_mse": float(
-            torch.mean((q_variance - optimal_mf_variance) ** 2).cpu()
-        ),
-        "all_parameters_finite": bool(
-            torch.isfinite(q_mean).all() and torch.isfinite(q_variance).all()
-        ),
+        "final_elbo": -float(total),
+        "all_parameters_finite": all(bool(p.isfinite().all()) for p in model.parameters()),
+        # Legacy v0 names retained for existing report readers.
+        "mean_squared_error": mean_mse,
+        "diagonal_variance_mse": optimal_variance_mse,
     }
-    if final_elbo is not None:
-        metrics["final_elbo"] = float(final_elbo)
-    return metrics
