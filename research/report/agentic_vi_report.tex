@@ -1,0 +1,96 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,margin=20mm,headheight=14pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,array,graphicx,xcolor,tikz,fancyhdr,hyperref,microtype}
+\definecolor{ink}{HTML}{19334A}
+\definecolor{muted}{HTML}{536477}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=ink,pdftitle={Agentic VI: Variational difficulty profiling},pdfsubject={Working report v0.1, Tasks 001--003}}
+\pagestyle{fancy}\fancyhf{}\lhead{\small\textcolor{muted}{AGENTIC VI / RESEARCH WORKING REPORT}}\rhead{\small\textcolor{muted}{v0.1}}
+\lfoot{\small\textcolor{muted}{27 November 2026}}\rfoot{\small\textcolor{muted}{\thepage}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{5pt}
+\setlength{\abovedisplayskip}{7pt}\setlength{\belowdisplayskip}{7pt}
+\renewcommand{\arraystretch}{1.14}
+\newcommand{\sectiontitle}[2]{\vspace*{1mm}{\large\bfseries\textcolor{muted}{#1}}\\[2pt]{\LARGE\bfseries\textcolor{ink}{#2}}\par\vspace{2mm}\hrule\vspace{3mm}}
+\newcommand{\KL}{\operatorname{KL}}
+\newcommand{\E}{\mathbb E}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\source}[1]{\par\smallskip{\footnotesize\textcolor{muted}{Source: #1}}\par}
+\begin{document}
+\thispagestyle{fancy}
+{\small\bfseries\textcolor{muted}{WORKING REPORT \enspace / \enspace VERSION 0.1 \enspace / \enspace TASKS 001--003}}\\[4pt]
+{\Huge\bfseries\textcolor{ink}{Agentic VI}}\\[5pt]
+{\LARGE\bfseries Variational difficulty profiling with mean-field inference}\\[4pt]
+{\large Preliminary mathematical framework and experimental evidence}\par
+\vspace{2mm}\hrule\vspace{3mm}
+\textbf{Abstract.} We investigate whether inexpensive mean-field variational inference (MFVI) can serve as a probe of inference difficulty, using only an unnormalized posterior density and its derivatives. A Variational Difficulty Profile (VDP) collects evidence about optimization, dependence, tail coverage, changing curvature and distinct fitted solutions from four independent MFVI runs. A protected computational budget accounts for all target evaluations. On Gaussian controls, the profile distinguishes several signs of incomplete optimization from persistent mean-field error. On the ten-dimensional Eight Schools posterior, the diagnostics favor non-centering at early matched budgets, consistent with independent quadrature-based posterior evaluation. These are controlled proof-of-concept results, not a calibrated decision policy or a general reliability guarantee.
+
+\section*{1. Research objective and scope}
+The long-term aim is to discover reliable VI algorithms that adapt objective, variational family, optimizer and parameterization to the problem. The current scope is narrower: Gaussian MFVI, reverse KL, Adam and a fixed diagnostic portfolio. The immediate question is whether the probe supplies useful information about \emph{why} inference is difficult, at a modest additional cost. The motivation includes robust stochastic VI optimization and high-dimensional VI \cite{dhaka20,dhaka21}. Reliability takes precedence over efficiency; complexity must be justified by evidence.
+
+\textbf{Target-access contract.} For a proper target, write
+\[p(x)=\tilde p(x)/Z,\qquad \ell(x)=\log\tilde p(x),\qquad Z=\int \tilde p(x)\,dx.\]
+The inference algorithm receives dimension, an initialization policy and metered access to $\ell$, its score $g=\nabla\ell$ and Hessian-vector products. Known posterior moments, exact KL, target covariance and reference solutions are evaluator-only information. The additive constant in $\ell$ disappears from derivatives, normalized importance weights and same-target ELBO differences. For constrained models the coordinate transformation and its Jacobian are included in $\ell$.
+
+\textbf{Milestones.}
+\begin{center}\small
+\begin{tabular}{p{17mm}p{61mm}p{77mm}}
+\toprule Task & Scientific role & Status / evidence \\\midrule
+001 & Analytical Gaussian baseline & 45 fits on nine fixed Gaussian targets \\
+002 & Implement and validate VDP v0.1 & 39 profiles, 156 fits; Gaussian controls \\
+003 & Test parameterization and changing geometry & Eight Schools, 8 profiles, 32 fits \\\bottomrule
+\end{tabular}
+\end{center}
+This is a living research report, versioned as of 27 November 2026. Numerical findings are taken from archived repository reports and per-fit results, not newly rerun experiments. All claims are conditional on the tested targets, settings and coordinates. No autonomous discovery loop or calibrated difficulty score has yet been validated.
+\source{\href{https://github.com/adhaka/agentic-vi/tree/research/003-eight-schools}{Agentic VI repository, Task 003 research branch}; \href{https://github.com/adhaka/agentic-vi/blob/main/VDP.md}{VDP v0.1 specification}.}
+\newpage
+\sectiontitle{METHODS / 02}{The variational probe and VDP}
+\textbf{MFVI.} Let $q_\phi=\mathcal N(m,D)$, $D=\diag(s^2)$, $a=\log s$, and $x=m+s\odot\epsilon$, $\epsilon\sim\mathcal N(0,I)$. The unnormalized ELBO and pathwise ascent gradients are
+\begin{align*}
+L(\phi)&=\E_\epsilon[\ell(x)]+\sum_i a_i+\tfrac d2(1+\log 2\pi)=\log Z-\KL(q_\phi\|p),\\
+\nabla_m L&=\E[g(x)],\qquad \nabla_a L=\mathbf1+\E[g(x)\odot s\odot\epsilon].
+\end{align*}
+Four dispersed starts use separate initialization and training random streams; diagnostic samples are independent of training. Task 002/003 use float64, constant-rate Adam ($0.03$), 64 draws/update, and a log-scale clamp $[-12,8]$. Horizons are 250, 500, 1,000 and 3,000 updates; histories are paired across horizons. A common-start control isolates stochastic-gradient variability.
+
+\textbf{Structured profile.} The five elements are groups of measurements, not calibrated scalars:
+\[\widehat{\mathbf C}=(C_{\rm opt},C_{\rm dep},C_{\rm tail},C_{\rm geom},C_{\rm mode}).\]
+\begin{center}\small
+\begin{tabular}{p{22mm}p{67mm}p{66mm}}
+\toprule Component & Recorded evidence & Interpretation / limitation \\\midrule
+$C_{\rm opt}$ & Classical and rank/folded split $\hat R$, drift, independent gradient mean and SE & Optimizer iterates, not posterior draws; no validated VI $\hat R$ cutoff \\
+$C_{\rm dep}$ & Standardized off-diagonal curvature & Local interactions; not marginal correlation \\
+$C_{\rm tail}$ & Pareto $\hat k$, raw and smoothed weight ESS & Finite-sample coverage warnings; missed regions may remain invisible \\
+$C_{\rm geom}$ & Relative curvature variation and directional curvature & Local changing stiffness; not a global geometry certificate \\
+$C_{\rm mode}$ & Six pairwise symmetric KL distances and within-run evidence & Distinct fits need not imply distinct posterior modes \\\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Optimization and weights.} For $M$ equal-length trajectories of length $n$, with within-chain variance $W$ and between-chain variance $B_R=n\operatorname{Var}(\bar x_m)$, classical $\hat R=\sqrt{[(n-1)W/n+B_R/n]/W}$. Rank normalization, splitting and folding follow \cite{vehtari21}; the last half of the logged iterates is used. Degenerate traces are flagged. Independent gradients are assessed in standardized coordinates $(s\odot g,1+s\odot\epsilon\odot g)$ with coordinate Monte Carlo SEs. Endpoint distances are $J_{ab}=\{\KL(q_a\|q_b)+\KL(q_b\|q_a)\}/2$, reported jointly and per dimension. With $x_j\sim q$, normalized weights are $w_j\propto\exp(\ell(x_j)-\log q(x_j))$, and $\mathrm{ESS}=1/\sum_j w_j^2$. PSIS is used as in \cite{yao18,vehtari24}. The sample-size reference $\min(1-1/\log_{10}S,0.7)$ is an importance-sampling warning, not a VI acceptance gate.
+
+\textbf{Hard budget.} For $N_f$ values, $N_g$ gradients and $N_h$ HVPs, enforce $N_f+N_g+N_h\le B$ in target-evaluation-equivalent units (TEU). A value costs 1, value+gradient 2, and value+gradient+HVP 3 per point/direction. Reserve full batches before execution; failed attempts are charged, denied requests are not executed. This provisional convention is not a runtime equivalence. All pilot and diagnostic calls count; independent oracle evaluation does not enter the inference budget. The implementation isolates trusted components, not adversarial agents.
+\newpage
+\sectiontitle{METHODS / 03}{Matrix-free curvature and Gaussian validation}
+\textbf{Curvature estimators.} Define $H(x)=-\nabla^2\ell(x)$ and $A(x)=D^{1/2}H(x)D^{1/2}$. At each of $J$ independent locations $x_j\sim q$, use the same $R$ independent Rademacher directions $z_r$ and compute $u_{jr}=A(x_j)z_r$ by metered HVPs. Let $t_{jri}=z_{ri}u_{jri}$. Conditional on the location, $\E_z t_{jri}=A_{ii}$ and $\operatorname{Var}_z(t_{jri})=\sum_{k\ne i}A_{ik}^2$. Thus total and off-diagonal squared Frobenius energies can be estimated without a dense Hessian:
+\[F_j=\frac1R\sum_r\|u_{jr}\|^2,\quad O_j=\sum_i\widehat{\operatorname{Var}}_r(t_{jri}),\quad \widehat C_{\rm dep}=\sqrt{\frac{\sum_j O_j}{\sum_j F_j}}.\]
+With $\bar u_r=J^{-1}\sum_j u_{jr}$, reuse the same HVPs for
+\[V=\frac{1}{R(J-1)}\sum_{j,r}\|u_{jr}-\bar u_r\|^2,\qquad \widehat C_{\rm geom}=\sqrt{\frac{V}{J^{-1}\sum_j F_j}}.\]
+The energy estimators are unbiased under the stated sampling and integrability assumptions, not their ratios. Values can exceed one at finite sample sizes; undefined denominators are flagged. Two-way bootstrap ranges describe exploratory sensitivity, not calibrated intervals. Curvature is parameterization-dependent and local to sampled $q$ support.
+
+\textbf{Task 001: analytical baseline.} For $p=\mathcal N(\mu,\Sigma)$ with precision $P=\Sigma^{-1}$, reverse-KL optimal MFVI satisfies $m^*=\mu$, $v_i^*=1/P_{ii}$. The exact decomposition, with $r_i=P_{ii}v_i$, is
+\begin{align*}
+\KL(q\|p)&=\underbrace{\tfrac12(\log\det\Sigma+\sum_i\log P_{ii})}_{\text{family/objective floor}}\\[-1mm]
+&\quad+\underbrace{\tfrac12[(m-\mu)^TP(m-\mu)+\sum_i(r_i-1-\log r_i)]}_{\text{optimization gap}}.
+\end{align*}
+The 45 runs (three geometries, dimensions 10/50/100, five seeds, 3,000 updates and 128 draws/update) demonstrate that convergence within a diagonal family is not sufficient for calibrated uncertainty. At $d=100$, the correlated and ill-conditioned floors account for 98.9\% and 99.1\% of mean KL, respectively.
+
+\textbf{Task 002: normalization-free diagnostics.} The same nine archived matrices were used for 36 main profiles plus three controls, at four horizons with four dispersed runs. Selected final results ($d=100$, 3,000 updates):
+\begin{center}\small
+\begin{tabular}{lrrrrrr}
+\toprule Target & Gap & Floor & Max $\hat R$ & Interaction & $\hat k$ & ESS \\\midrule
+Independent & 0.205 & 0 & 1.03 & 0 & 0.153 & 673\\
+Correlated & 0.284 & 22.3 & 1.05 & 0.556 & 1.82 & 1.66\\
+Ill-conditioned & 0.685 & 72.3 & 2.51 & 0.834 & 3.06 & 1.64\\
+\bottomrule
+\end{tabular}
+\end{center}
+KL in joint nats; fit-level quantities are medians except profile maximum $\hat R$. ESS uses 1,024 draws. The ill-conditioned gap fell from 99.6 to 0.685 nats, while interaction was already 0.809 at 250 updates. Geometry was numerically zero throughout, as expected for Gaussian Hessians. A high-rate control produced nearly 12 times worse gap despite lower $\hat R$; trajectory stability is not accuracy. Diagnostic cost per profile was $8G+4S+12JR=7{,}680$ TEU for $G=256,S=1024,J=8,R=16$, 5.66\% of the shortest full budget.
+\source{\href{https://github.com/adhaka/agentic-vi/blob/research/003-eight-schools/research/task001/REPORT.md}{Task 001 report}; \href{https://github.com/adhaka/agentic-vi/blob/research/003-eight-schools/research/task002/REPORT.md}{Task 002 report}.}
