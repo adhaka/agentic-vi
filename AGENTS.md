@@ -29,3 +29,11 @@ Task 001 includes the experiment runner, audit command, raw data, and interpreta
 - Never select candidates solely by their own training objective. Freeze complementary quality gates before running candidates, report all failures, and prefer simpler feasible methods. Do not silently tune thresholds or reuse held-out targets for development.
 - Count target log-density and gradient calls including adaptation and importance weighting; report wall time and memory separately. Matched steps alone are not matched compute.
 - Task 002 is a proposed controlled study, not permission to start autonomous search. Preserve Task 001 and prepare a versioned protocol for review before execution. Repository rules alone are not a security boundary: future agent execution must enforce evaluator and benchmark isolation.
+
+
+## MFVI diagnostic pilot rules
+
+- For prospective studies start with four independent MFVI runs using frozen seed identifiers and a documented dispersed initialization policy; log separate initialization and sampling RNG streams. Use common-start controls when isolating stochastic-gradient variability. Do not rewrite Task 001's five-seed records.
+- Record parameter trajectories at fixed cadence; freeze the diagnostic window and compute classical and rank-normalized split/folded R-hat, late-window drift, gradient uncertainty and all six fitted-distribution pairwise comparisons. Explicitly handle zero variance, insufficient observations and nonfinite values. Never interpret R-hat as posterior MCMC convergence or a proof of global optimality.
+- Maintain a diagnostic difficulty profile (optimization, dependence, tails/coverage, geometry, possible multiple basins); record evidence, uncertainty and the rationale for the next intervention. Agreement does not rule out missed modes. Disagreement does not establish multimodality.
+- Keep oracle labels and metrics out of deployable decisions. Charge all four runs, diagnostics and follow-up work to the same end-to-end budget. Stop only at predeclared reliability gates, otherwise investigate or report unresolved failure. Validate the policy on controlled and held-out targets before authorizing autonomous discovery.
