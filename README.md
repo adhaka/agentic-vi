@@ -78,3 +78,7 @@ Schema 2 reports the exact post-update ELBO, irreducible mean-field KL, excess o
 ## Task 002 · Variational Difficulty Profile
 
 The four-run probe uses metered log densities, gradients and negative-Hessian-vector products. It records optimization, local curvature, importance-weight and between-fit diagnostics. The research dependencies and reproduction commands are in the [Task 002 scientific report](research/task002/REPORT.md). The [frozen protocol](research/task002/PROTOCOL.md) defines the study matrix and charge convention.
+
+## Task 003 · Eight Schools
+
+The [scientific report](research/task003/REPORT.md) compares centered and non-centered diagonal Gaussian fits under matched VDP budgets. It includes an independent quadrature reference, common-coordinate accuracy comparisons, and reproduction commands.
