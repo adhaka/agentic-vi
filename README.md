@@ -68,3 +68,9 @@ This is a **baseline scaffold**, not yet an autonomous discovery agent and not
 evidence of a new VI method. It intentionally starts with one target family,
 one variational family, one objective, and one optimizer. The next milestone is
 validation and benchmark expansion, not unrestricted automated search.
+
+## Task 001 research baseline
+
+[Research charter and analytical reference](RESEARCH.md) · [Scientific report and reproduction commands](research/task001/REPORT.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
+
+Schema 2 reports the exact post-update ELBO, irreducible mean-field KL, excess optimization KL, and separate errors for posterior marginal variances and optimal mean-field variances. Historical reports used the last pre-update Monte Carlo training estimate for `final_elbo`. Use the canonical metric names in DECISIONS.md for new analyses.
